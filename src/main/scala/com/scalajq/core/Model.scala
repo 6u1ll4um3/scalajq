@@ -3,8 +3,6 @@ package com.scalajq.core
 sealed trait Exp
 case class TermExp(term: Term) extends Exp
 
-case class IndexExpr(e: Exp)
-
 sealed trait Term
 case object RecTerm extends Term
 case object NullTerm extends Term
@@ -22,3 +20,6 @@ case class StringModel(value: String) extends Model
 case class BooleanModel(value: Boolean) extends Model
 case class IdentifierModel(name: String) extends Model
 case class FieldModel(name: String) extends Model
+case class IndexModel(exp: Exp) extends Model
+
+

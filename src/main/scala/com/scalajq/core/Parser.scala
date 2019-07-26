@@ -9,26 +9,25 @@ object Parser {
 
   def numberTerm[_: P]: P[Term] = Operator.num.map(nl => NumberTerm(nl))
 
-  def strOrNbTerm[_: P]: P[Term] = stringTerm | numberTerm
+  def idxTerm[_: P]: P[Term] = "[" ~ (stringTerm | numberTerm) ~ "]"
 
-  def fieldTerm[_: P]: P[Term] = {
-    ((Operator.field ~ "?".!.?).rep(1) ~ indexExpr.?).rep(1).map { seqField =>
+  def fieldModel[_: P]: P[(FieldModel, Option[String])] = Operator.field ~ "?".!.?
 
-      val seqTerm: Seq[Term] = seqField.map { s =>
-        wrapIndexTerm(FieldTerm(s._1.toList.map { case (f, o) => (f, o.isDefined) }), s._2)
-      }
+  def fieldTerm[_: P]: P[Term] = (fieldModel.rep(1) ~ indexModel).rep(1).map { seqField =>
 
-      SeqTerm(seqTerm)
+    val seqTerm: Seq[Term] = seqField.map { s =>
+      wrapIndexTerm(FieldTerm(s._1.toList.map { case (f, o) => (f, o.isDefined) }), s._2)
     }
+    SeqTerm(seqTerm)
   }
 
-  def indexTerm[_: P]: P[Term] = P(".") ~ indexExpr.?.map { ie => wrapIndexTerm(IdentityTerm, ie) }
+  def indexTerm[_: P]: P[Term] = Operator.dot ~ indexModel.map { ie => wrapIndexTerm(IdentityTerm, ie) }
 
-  def indexExpr[_: P]: P[IndexExpr] = ("[" ~ strOrNbTerm ~ "]").map(t => IndexExpr(TermExp(t)))
+  def indexModel[_: P]: P[Option[IndexModel]] = idxTerm.map(t => IndexModel(TermExp(t))).?
 
-  def wrapIndexTerm(t: Term, idx: Option[IndexExpr]): Term = idx match {
+  def wrapIndexTerm(t: Term, idx: Option[IndexModel]): Term = idx match {
     case None => t
-    case Some(IndexExpr(e)) => IndexTerm(t, e)
+    case Some(IndexModel(e)) => IndexTerm(t, e)
   }
 
   def term[_: P]: P[Term] = fieldTerm | indexTerm

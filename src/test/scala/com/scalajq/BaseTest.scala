@@ -6,13 +6,13 @@ trait BaseTest {
     s"""
        |{
        |  "name": "Star Wars",
-       |  "author" : {
-       |      "firstName" : "George",
-       |      "lastName" : "Lucas",
-       |      "born" : {
-       |          "place" : "California",
-       |          "year" : 1944
-       |      }
+       |  "author": {
+       |    "firstName": "George",
+       |    "lastName": "Lucas",
+       |    "born": {
+       |      "place": "California",
+       |      "year": 1944
+       |    }
        |  },
        |  "characters": [
        |    {
@@ -25,7 +25,18 @@ trait BaseTest {
        |      "name": "Rey",
        |      "appearance": 2015,
        |      "species": "Human",
-       |      "gender": "Female"
+       |      "gender": "Female",
+       |      "weapons": [
+       |        {
+       |          "name": "Quarterstaff"
+       |        },
+       |        {
+       |          "name": "Lightsaber"
+       |        },
+       |        {
+       |          "name": "Blaster"
+       |        }
+       |      ]
        |    }
        |  ]
        |}

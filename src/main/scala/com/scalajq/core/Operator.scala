@@ -42,6 +42,7 @@ object Operator {
   def setmult[_: P]: P[Unit]      = P("*=")
   def setpipe[_: P]: P[Unit]      = P("|=")
   def setplus[_: P]: P[Unit]      = P("+=")
+  def dot[_: P]: P[Unit]          = P(".")
 
   def enterBracket[_: P]: P[String]   = CharIn("[{(").!
   def exitBracket[_: P]: P[String]    = CharIn("]})").!

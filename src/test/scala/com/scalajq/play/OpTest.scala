@@ -23,7 +23,12 @@ class OpTest extends FlatSpec with MustMatchers with BaseTest {
         "name" -> "Rey",
         "appearance" -> 2015,
         "species" -> "Human",
-        "gender" -> "Female"
+        "gender" -> "Female",
+        "weapons" -> Json.arr(
+          Json.obj("name" -> "Quarterstaff"),
+          Json.obj("name" -> "Lightsaber"),
+          Json.obj("name" -> "Blaster")
+        )
       )
     )
   }
@@ -66,5 +71,9 @@ class OpTest extends FlatSpec with MustMatchers with BaseTest {
 
   "ScalaJq" should "get node with 3 fields expression" in {
     JQ(json, ".author.born.year") mustBe JsNumber(1944)
+  }
+
+  "ScalaJq" should "get meta with 2 array fields expression" in {
+    JQ(json, ".characters[1].weapons[2].name") mustBe JsString("Blaster")
   }
 }
