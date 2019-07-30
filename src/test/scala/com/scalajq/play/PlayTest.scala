@@ -3,12 +3,16 @@ package com.scalajq.play
 import com.scalajq.{BaseTest, JQ}
 import org.scalatest._
 
-class OpTest extends FlatSpec with MustMatchers with BaseTest {
+class PlayTest extends FlatSpec with MustMatchers with BaseTest {
 
   import play.api.libs.json._
   import com.scalajq.play.Mapper._
 
   val json = Json.parse(jsStarWars)
+
+  "ScalaJq" should "return self" in {
+    JQ(json, ".") mustBe json
+  }
 
   "ScalaJq" should "get node with field expression" in {
 
@@ -33,7 +37,7 @@ class OpTest extends FlatSpec with MustMatchers with BaseTest {
     )
   }
 
-  "ScalaJq" should "get node with array expression" in {
+  "ScalaJq" should "get node with Array Index" in {
 
     val js = Json.parse(s"""
          |[
@@ -75,5 +79,45 @@ class OpTest extends FlatSpec with MustMatchers with BaseTest {
 
   "ScalaJq" should "get meta with 2 array fields expression" in {
     JQ(json, ".characters[1].weapons[2].name") mustBe JsString("Blaster")
+  }
+
+  "ScalaJq" should "get meta with Generic Object Index" in {
+    JQ(json, """.["name"]""") mustBe JsString("Star Wars")
+  }
+
+  "ScalaJq" should "get nodes with slice" in {
+
+    val js = Json.parse(s"""
+                           |[
+                           |    {
+                           |      "name": "Yoda"
+                           |    },
+                           |    {
+                           |      "name": "Rey"
+                           |    },
+                           |    {
+                           |      "name": "Obi-Wan Kenobi"
+                           |    },
+                           |    {
+                           |      "name": "Luke Skywalker"
+                           |    },
+                           |    {
+                           |      "name": "Han Solo"
+                           |    }
+                           |]
+     """.stripMargin)
+
+    JQ(js, ".[1:4]") mustBe Json.arr(
+        Json.obj("name" -> "Rey"),
+        Json.obj("name" -> "Obi-Wan Kenobi"),
+        Json.obj("name" -> "Luke Skywalker")
+    )
+  }
+
+  "ScalaJq" should "get 2 nodes with slice" in {
+    JQ(json, ".characters[1].weapons[0:2]") mustBe Json.arr(
+      Json.obj("name"-> "Quarterstaff"),
+      Json.obj("name"-> "Lightsaber")
+    )
   }
 }

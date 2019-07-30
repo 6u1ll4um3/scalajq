@@ -20,6 +20,7 @@ object Translator {
   }
 
   def termToFunction(term: Term): JqFunction = {
+
     term match {
       case IdentityTerm               => identityToFunction
       case FieldTerm(fields)          => composeList(fields.map {
@@ -27,6 +28,7 @@ object Translator {
                                       })
       case SeqTerm(terms)             => seqToFunction(terms.head, terms.tail)
       case IndexTerm(t, idx)          => indexToFunction(t, idx)
+      case SliceTerm(t, start, end)   => sliceToFunction(t, start, end)
       case StringTerm(str)            => constantToFunction(jString(str))
       case NumberTerm(n)              => constantToFunction(jNumber(n.value))
       case NullTerm                   => constantToFunction(jNull)
@@ -76,6 +78,22 @@ object Translator {
     } else {
       throw new Exception(s"index expected to be String or Integer $field")
     }
+  }
+
+  def sliceToFunction(trm: Term, startExp: Exp, endExp: Exp) = JqFunction { input =>
+
+    val termFunction = termToFunction(trm)
+    val startFunction = expToFunction(startExp)
+    val endFunction = expToFunction(endExp)
+    val term = termFunction(input)
+
+    val startIdx = startFunction(term).numberOr(throw new Exception("Number expected")).toInt.getOrElse(throw new Exception("Int expected"))
+    val endIdx = endFunction(term).numberOr(throw new Exception("Number expected")).toInt.getOrElse(throw new Exception("Int expected"))
+    val indices = startIdx until endIdx
+
+    val functions: Seq[JqFunction] = indices.map(idx => indexToFunction(trm, TermExp(NumberTerm(NumberModel(idx)))))
+
+    Json.array(functions.map(f => f(input)): _*)
   }
 
   def constantToFunction(value: Json) = JqFunction { _ => value }
