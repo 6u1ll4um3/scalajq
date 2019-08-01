@@ -1,21 +1,17 @@
-package com.scalajq.play
+package com.scalajq
 
-import com.scalajq.{BaseTest, JQ}
 import org.scalatest._
+import play.api.libs.json._
 
-class PlayTest extends FlatSpec with MustMatchers with BaseTest {
+class JqTest extends FlatSpec with MustMatchers with BaseTest {
 
-  import play.api.libs.json._
-  import com.scalajq.play.Mapper._
-
-  val json = Json.parse(jsStarWars)
+  val json: JsValue = Json.parse(jsStarWars)
 
   "ScalaJq" should "return self" in {
     JQ(json, ".") mustBe json
   }
 
   "ScalaJq" should "get node with field expression" in {
-
     JQ(json, ".characters") mustBe Json.arr(
       Json.obj(
         "name" -> "Yoda",
@@ -39,16 +35,7 @@ class PlayTest extends FlatSpec with MustMatchers with BaseTest {
 
   "ScalaJq" should "get node with Array Index" in {
 
-    val js = Json.parse(s"""
-         |[
-         |    {
-         |      "name": "Yoda"
-         |    },
-         |    {
-         |      "name": "Rey"
-         |    }
-         |]
-     """.stripMargin)
+    val js = Json.parse(characters.stripMargin)
 
     JQ(js, ".[0]") mustBe Json.obj(
       "name" -> "Yoda"
@@ -56,7 +43,6 @@ class PlayTest extends FlatSpec with MustMatchers with BaseTest {
   }
 
   "ScalaJq" should "get node with field array expression" in {
-
     JQ(json, ".characters[0]") mustBe Json.obj(
       "name" -> "Yoda",
       "appearance" -> 1980,
@@ -87,25 +73,7 @@ class PlayTest extends FlatSpec with MustMatchers with BaseTest {
 
   "ScalaJq" should "get nodes with slice" in {
 
-    val js = Json.parse(s"""
-                           |[
-                           |    {
-                           |      "name": "Yoda"
-                           |    },
-                           |    {
-                           |      "name": "Rey"
-                           |    },
-                           |    {
-                           |      "name": "Obi-Wan Kenobi"
-                           |    },
-                           |    {
-                           |      "name": "Luke Skywalker"
-                           |    },
-                           |    {
-                           |      "name": "Han Solo"
-                           |    }
-                           |]
-     """.stripMargin)
+    val js = Json.parse(characters.stripMargin)
 
     JQ(js, ".[1:4]") mustBe Json.arr(
         Json.obj("name" -> "Rey"),
@@ -120,4 +88,18 @@ class PlayTest extends FlatSpec with MustMatchers with BaseTest {
       Json.obj("name"-> "Lightsaber")
     )
   }
+
+  "ScalaJq" should "get all nodes with slice" in {
+    JQ(json, ".characters[1].weapons[]") mustBe Json.arr(
+      Json.obj("name"-> "Quarterstaff"),
+      Json.obj("name"-> "Lightsaber"),
+      Json.obj("name"-> "Blaster")
+    )
+  }
+
+  "ScalaJq" should "get 4 nodes separated by a comma" in {
+    JQ(json, ".name, .author.lastName, .author.born.year, .place") mustBe
+      Json.arr("Star Wars", "Lucas", 1944, "in a galaxy far far away")
+  }
+
 }

@@ -1,51 +1,61 @@
 package com.scalajq.core
 
-import argonaut.Argonaut.{jNull, jNumber, jString}
-import argonaut.{Json, JsonLong}
+import play.api.libs.json.{JsArray, JsNull, JsNumber, JsString, JsValue, Json}
 
-
-case class JqFunction(fn: Json => Json) {
-  def apply(in: Json): Json = fn(in)
+case class JqFunction(fn: JsValue => JsValue) {
+  def apply(in: JsValue): JsValue = fn(in)
 }
 
 object Translator {
 
   val identityToFunction = JqFunction(input => input )
 
-  def run(exp: Exp, input: Json): Json = {
+  def run(exp: Exp, input: JsValue): JsValue = {
     exp match {
-      case TermExp (t)  => termToFunction(t)(input)
-      case e            => throw new Exception(s"Unable to handle expression $e")
+      case TermsExp(ts) if ts.tail.nonEmpty     => termsToFunction(ts, input)
+      case TermsExp(ts) if ts.tail.isEmpty      => termToFunction(ts.head)(input)
+      case TermExp(t)                           => termToFunction(t)(input)
+      case e                                    => throw new Exception(s"run, unable to handle expression $e")
+    }
+  }
+
+  def termsToFunction(terms: Seq[Term], input: JsValue): JsArray = {
+
+    val headTerm: JsValue = termToFunction(terms.head)(input)
+    if (terms.tail.isEmpty) {
+      Json.arr(headTerm)
+    } else {
+      headTerm +: termsToFunction(terms.tail, input)
     }
   }
 
   def termToFunction(term: Term): JqFunction = {
-
     term match {
       case IdentityTerm               => identityToFunction
       case FieldTerm(fields)          => composeList(fields.map {
-                                        case (FieldModel(name), _)    => fieldToFunction(jString(name))
+                                        case (FieldModel(name), _)    => fieldToFunction(JsString(name))
                                       })
-      case SeqTerm(terms)             => seqToFunction(terms.head, terms.tail)
+      case SeqTerm(terms)             => seqToFunction(terms)
       case IndexTerm(t, idx)          => indexToFunction(t, idx)
       case SliceTerm(t, start, end)   => sliceToFunction(t, start, end)
-      case StringTerm(str)            => constantToFunction(jString(str))
-      case NumberTerm(n)              => constantToFunction(jNumber(n.value))
-      case NullTerm                   => constantToFunction(jNull)
-      case t                          => throw new Exception(s"term type not manage : $t")
+      case StringTerm(str)            => constantToFunction(JsString(str))
+      case NumberTerm(n)              => constantToFunction(JsNumber(n.value))
+      case NullTerm                   => constantToFunction(JsNull)
+      case t                          => throw new Exception(s"termToFunction, term type not manage : $t")
     }
   }
 
-  def seqToFunction(term: Term, terms: Seq[Term]): JqFunction = JqFunction { input =>
-    if(terms.isEmpty) {
-      termToFunction(term)(input)
+  def seqToFunction(terms: Seq[Term]): JqFunction = JqFunction { input =>
+    if(terms.tail.isEmpty) {
+      termToFunction(terms.head)(input)
     } else {
-      seqToFunction(terms.head, terms.tail)(termToFunction(term)(input))
+      seqToFunction(terms.tail)(termToFunction(terms.head)(input))
     }
   }
 
   def expToFunction(exp: Exp): JqFunction = exp match {
-    case TermExp(term) => termToFunction(term)
+    case TermExp(term)     => termToFunction(term)
+    case e                 => throw new Exception(s"expToFunction, unable to handle expression $e")
   }
 
   def indexToFunction(term: Term, index: Exp) = JqFunction { input =>
@@ -58,25 +68,23 @@ object Translator {
     fieldToFunction(idx)(trm)
   }
 
-  def fieldToFunction(field: Json): JqFunction = JqFunction { input =>
+  def fieldToFunction(field: JsValue): JqFunction = JqFunction { input =>
 
-    if (field.isString) {
-      input.fieldOr(field.stringOrEmpty, jNull)
-    } else if (field.isNumber) {
-      val jNum = field.numberOr(JsonLong(0))
-      val suppliedIndex = jNum.toInt.getOrElse(throw new Exception(s"index is not a Integer $field"))
-      val array = input.arrayOrEmpty
-
-      if (suppliedIndex >= 0 && suppliedIndex < array.length) {
-        array(suppliedIndex)
-      } else if (suppliedIndex < 0) {
-        val reverseIndex = array.length + suppliedIndex
-        if (reverseIndex >= 0) {
-          array(reverseIndex)
-        } else jNull
-      } else jNull
-    } else {
-      throw new Exception(s"index expected to be String or Integer $field")
+    field match {
+      case JsNumber(n) =>
+        input match {
+          case JsArray(value) if n >= 0 && n < value.length => value(n.toInt)
+          case JsArray(value) if n<0 =>
+            val reverseIndex = value.length + n.toInt
+            if (reverseIndex >= 0) {
+              value(reverseIndex)
+            } else {
+              JsNull
+            }
+          case e => throw new Exception(s"fieldToFunction, input not supported $e")
+        }
+      case JsString(str) => (input \ str).toOption.getOrElse(throw new Exception(s"fieldToFunction, unable to get field"))
+      case e  => throw new Exception(s"fieldToFunction, field not supported $e")
     }
   }
 
@@ -87,16 +95,17 @@ object Translator {
     val endFunction = expToFunction(endExp)
     val term = termFunction(input)
 
-    val startIdx = startFunction(term).numberOr(throw new Exception("Number expected")).toInt.getOrElse(throw new Exception("Int expected"))
-    val endIdx = endFunction(term).numberOr(throw new Exception("Number expected")).toInt.getOrElse(throw new Exception("Int expected"))
+
+    val startIdx = startFunction(term).asOpt[Int].getOrElse(throw new Exception("sliceToFunction, Int expected"))
+    val endIdx = endFunction(term).asOpt[Int].getOrElse(throw new Exception("sliceToFunction, Int expected"))
     val indices = startIdx until endIdx
 
     val functions: Seq[JqFunction] = indices.map(idx => indexToFunction(trm, TermExp(NumberTerm(NumberModel(idx)))))
 
-    Json.array(functions.map(f => f(input)): _*)
+    JsArray(functions.map(f => f(input)))
   }
 
-  def constantToFunction(value: Json) = JqFunction { _ => value }
+  def constantToFunction(value: JsValue) = JqFunction { _ => value }
 
   def composeList(lst: List[JqFunction]): JqFunction = lst.foldLeft(identityToFunction) {
     (acc, next) => JqFunction { input =>

@@ -2,6 +2,7 @@ package com.scalajq.core
 
 sealed trait Exp
 case class TermExp(term: Term) extends Exp
+case class TermsExp(terms: Seq[Term]) extends Exp
 
 sealed trait Term
 case object RecTerm extends Term

@@ -1,16 +1,14 @@
 package com.scalajq
 
-import argonaut.{Json => ArgJson}
-import com.scalajq.core.{Exp, Translator, Parser}
+import com.scalajq.core.{Exp, Parser, Translator}
 import fastparse.parse
-import scalaz.Isomorphism.<=>
+import play.api.libs.json.JsValue
 
 object JQ {
 
-  def apply[JS](js: JS, q: String)(implicit iso: JS <=> ArgJson): JS = {
+  def apply(js: JsValue, q: String): JsValue = {
 
     val exp: Exp = parse(q, Parser.exp).get.value
-    val argJson: ArgJson = Translator.run(exp, iso.to(js))
-    iso.from(argJson)
+    Translator.run(exp, js)
   }
 }

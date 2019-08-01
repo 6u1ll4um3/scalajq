@@ -5,5 +5,4 @@ Scala jq
 
 Using 
 *  [com.lihaoyi.fastparse](https://github.com/lihaoyi/fastparse/)
-*  [io.argonaut](http://argonaut.io/)
 *  [com.typesafe.play](https://www.playframework.com/)

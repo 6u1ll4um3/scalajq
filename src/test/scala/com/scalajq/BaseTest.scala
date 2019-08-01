@@ -6,6 +6,7 @@ trait BaseTest {
     s"""
        |{
        |  "name": "Star Wars",
+       |  "place": "in a galaxy far far away",
        |  "author": {
        |    "firstName": "George",
        |    "lastName": "Lucas",
@@ -41,5 +42,25 @@ trait BaseTest {
        |  ]
        |}
      """.stripMargin
+
+  val characters: String =
+    s"""[
+      {
+        "name": "Yoda"
+      },
+      {
+        "name": "Rey"
+      },
+      {
+        "name": "Obi-Wan Kenobi"
+      },
+      {
+        "name": "Luke Skywalker"
+      },
+      {
+        "name": "Han Solo"
+      }
+    ]""".stripMargin
+
 
 }

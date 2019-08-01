@@ -1,6 +1,5 @@
 package com.scalajq.core
 
-import argonaut.Argonaut.JsonBoolean
 import fastparse.NoWhitespace._
 import fastparse.{CharIn, CharsWhile, CharsWhileIn, P, _}
 
@@ -53,7 +52,7 @@ object Operator {
   def fractional[Any: P]: P[Unit]     = P( "." ~ digits )
   def integral[Any: P]: P[Unit]       = P( "0" | CharIn("1-9")  ~ digits.? )
 
-  def stringChars(c: Char): JsonBoolean = c != '\"' && c != '\\'
+  def stringChars(c: Char): Boolean     = c != '\"' && c != '\\'
 
   def space[Any: P]: P[Unit]            = P( CharsWhileIn(" \r\n", 0) )
   def hexDigit[Any: P]: P[Unit]         = P( CharIn("0-9a-fA-F") )
