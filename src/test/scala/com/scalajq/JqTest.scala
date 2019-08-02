@@ -7,11 +7,11 @@ class JqTest extends FlatSpec with MustMatchers with BaseTest {
 
   val json: JsValue = Json.parse(jsStarWars)
 
-  "ScalaJq" should "return self" in {
+  "ScalaJq" should "resolve Identity" in {
     JQ(json, ".") mustBe json
   }
 
-  "ScalaJq" should "get node with field expression" in {
+  "ScalaJq" should "resolve Object Identifier-Index" in {
     JQ(json, ".characters") mustBe Json.arr(
       Json.obj(
         "name" -> "Yoda",
@@ -33,7 +33,7 @@ class JqTest extends FlatSpec with MustMatchers with BaseTest {
     )
   }
 
-  "ScalaJq" should "get node with Array Index" in {
+  "ScalaJq" should "resolve Array Index" in {
 
     val js = Json.parse(characters.stripMargin)
 
@@ -42,7 +42,7 @@ class JqTest extends FlatSpec with MustMatchers with BaseTest {
     )
   }
 
-  "ScalaJq" should "get node with field array expression" in {
+  "ScalaJq" should "resolve Object Identifier-Index with Array Index" in {
     JQ(json, ".characters[0]") mustBe Json.obj(
       "name" -> "Yoda",
       "appearance" -> 1980,
@@ -51,27 +51,31 @@ class JqTest extends FlatSpec with MustMatchers with BaseTest {
     )
   }
 
-  "ScalaJq" should "get meta with field array expression" in {
+  "ScalaJq" should "resolve Object Identifier-Index two times, with Array Index" in {
     JQ(json, ".characters[0].name") mustBe JsString("Yoda")
   }
 
-  "ScalaJq" should "get node with 2 fields expression" in {
+  "ScalaJq" should "resolve Object Identifier-Index two times, with Array Index, with String Slice" in {
+    JQ(json, ".characters[0].name[0:2]") mustBe JsString("Yo")
+  }
+
+  "ScalaJq" should "resolve Object Identifier-Index two times" in {
     JQ(json, ".author.lastName") mustBe JsString("Lucas")
   }
 
-  "ScalaJq" should "get node with 3 fields expression" in {
+  "ScalaJq" should "resolve Object Identifier-Index three times" in {
     JQ(json, ".author.born.year") mustBe JsNumber(1944)
   }
 
-  "ScalaJq" should "get meta with 2 array fields expression" in {
+  "ScalaJq" should "resolve Object Identifier-Index three times, with two Array Index" in {
     JQ(json, ".characters[1].weapons[2].name") mustBe JsString("Blaster")
   }
 
-  "ScalaJq" should "get meta with Generic Object Index" in {
+  "ScalaJq" should "resolve Generic Object Index" in {
     JQ(json, """.["name"]""") mustBe JsString("Star Wars")
   }
 
-  "ScalaJq" should "get nodes with slice" in {
+  "ScalaJq" should "resolve Array Slice" in {
 
     val js = Json.parse(characters.stripMargin)
 
@@ -82,14 +86,14 @@ class JqTest extends FlatSpec with MustMatchers with BaseTest {
     )
   }
 
-  "ScalaJq" should "get 2 nodes with slice" in {
+  "ScalaJq" should "resolve Object Identifier-Index two times, with Array Index and Array Slice" in {
     JQ(json, ".characters[1].weapons[0:2]") mustBe Json.arr(
       Json.obj("name"-> "Quarterstaff"),
       Json.obj("name"-> "Lightsaber")
     )
   }
 
-  "ScalaJq" should "get all nodes with slice" in {
+  "ScalaJq" should "resolve Object Identifier-Index two times, with Array Index and Array Slice empty" in {
     JQ(json, ".characters[1].weapons[]") mustBe Json.arr(
       Json.obj("name"-> "Quarterstaff"),
       Json.obj("name"-> "Lightsaber"),
@@ -97,7 +101,7 @@ class JqTest extends FlatSpec with MustMatchers with BaseTest {
     )
   }
 
-  "ScalaJq" should "get 4 nodes separated by a comma" in {
+  "ScalaJq" should "resolve Object Identifier-Index separated by a comma" in {
     JQ(json, ".name, .author.lastName, .author.born.year, .place") mustBe
       Json.arr("Star Wars", "Lucas", 1944, "in a galaxy far far away")
   }
