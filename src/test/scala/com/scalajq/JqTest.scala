@@ -6,6 +6,7 @@ import play.api.libs.json._
 class JqTest extends FlatSpec with MustMatchers with BaseTest {
 
   val json: JsValue = Json.parse(jsStarWars)
+  val jsCharacters = Json.parse(characters.stripMargin)
 
   "ScalaJq" should "resolve Identity" in {
     JQ(json, ".") mustBe json
@@ -23,7 +24,7 @@ class JqTest extends FlatSpec with MustMatchers with BaseTest {
         "name" -> "Rey",
         "appearance" -> 2015,
         "species" -> "Human",
-        "gender" -> "Female",
+        "gender" -> "female",
         "weapons" -> Json.arr(
           Json.obj("name" -> "Quarterstaff"),
           Json.obj("name" -> "Lightsaber"),
@@ -34,11 +35,9 @@ class JqTest extends FlatSpec with MustMatchers with BaseTest {
   }
 
   "ScalaJq" should "resolve Array Index" in {
-
-    val js = Json.parse(characters.stripMargin)
-
-    JQ(js, ".[0]") mustBe Json.obj(
-      "name" -> "Yoda"
+    JQ(jsCharacters, ".[0]") mustBe Json.obj(
+      "name" -> "Yoda",
+      "gender" -> "male"
     )
   }
 
@@ -76,13 +75,10 @@ class JqTest extends FlatSpec with MustMatchers with BaseTest {
   }
 
   "ScalaJq" should "resolve Array Slice" in {
-
-    val js = Json.parse(characters.stripMargin)
-
-    JQ(js, ".[1:4]") mustBe Json.arr(
-        Json.obj("name" -> "Rey"),
-        Json.obj("name" -> "Obi-Wan Kenobi"),
-        Json.obj("name" -> "Luke Skywalker")
+    JQ(jsCharacters, ".[1:4]") mustBe Json.arr(
+        Json.obj("name" -> "Rey", "gender" -> "female"),
+        Json.obj("name" -> "Obi-Wan Kenobi", "gender" -> "male"),
+        Json.obj("name" -> "Luke Skywalker", "gender" -> "male")
     )
   }
 
@@ -105,5 +101,10 @@ class JqTest extends FlatSpec with MustMatchers with BaseTest {
     JQ(json, ".name, .author.lastName, .author.born.year, .place") mustBe
       Json.arr("Star Wars", "Lucas", 1944, "in a galaxy far far away")
   }
+
+//  "ScalaJq" should "resolve | operator combining two filters" in {
+//    JQ(jsCharacters, ".[] | .name") mustBe
+//      Json.arr("Yoda", "Rey", "Obi-Wan Kenobi", "Luke Skywalker", "Han Solo")
+//  }
 
 }

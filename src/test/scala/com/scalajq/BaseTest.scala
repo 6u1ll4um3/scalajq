@@ -26,7 +26,7 @@ trait BaseTest {
        |      "name": "Rey",
        |      "appearance": 2015,
        |      "species": "Human",
-       |      "gender": "Female",
+       |      "gender": "female",
        |      "weapons": [
        |        {
        |          "name": "Quarterstaff"
@@ -44,23 +44,29 @@ trait BaseTest {
      """.stripMargin
 
   val characters: String =
-    s"""[
-      {
-        "name": "Yoda"
-      },
-      {
-        "name": "Rey"
-      },
-      {
-        "name": "Obi-Wan Kenobi"
-      },
-      {
-        "name": "Luke Skywalker"
-      },
-      {
-        "name": "Han Solo"
-      }
-    ]""".stripMargin
+    s"""|[
+        |  {
+        |    "name": "Yoda",
+        |    "gender": "male"
+        |  },
+        |  {
+        |    "name": "Rey",
+        |    "gender": "female"
+        |  },
+        |  {
+        |    "name": "Obi-Wan Kenobi",
+        |    "gender": "male"
+        |  },
+        |  {
+        |    "name": "Luke Skywalker",
+        |    "gender": "male"
+        |  },
+        |  {
+        |    "name": "Han Solo",
+        |    "gender": "male"
+        |  }
+        |]
+     """.stripMargin
 
 
 }

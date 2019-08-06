@@ -5,11 +5,11 @@ import fastparse._
 
 object Parser {
 
-  def stringTerm[_: P]: P[StringTerm] = Operator.string.map(s => StringTerm(s.value))
+  def stringTerm[_: P]: P[StringTerm] = Operator.stringModel.map(s => StringTerm(s.value))
 
-  def numberTerm[_: P]: P[NumberTerm] = Operator.num.map(NumberTerm)
+  def numberTerm[_: P]: P[NumberTerm] = Operator.numModel.map(NumberTerm)
 
-  def fieldModel[_: P]: P[(FieldModel, Option[String])] = Operator.field ~ "?".!.?
+  def fieldModel[_: P]: P[(FieldModel, Option[String])] = Operator.fieldModel ~ "?".!.?
 
   def fieldTerm[_: P]: P[SeqTerm] = (fieldModel.rep(1) ~ sliceOrIndexModel).rep(1).map { seqField =>
 
@@ -32,7 +32,7 @@ object Parser {
     case Some(SliceOrIndexModel(e, None)) => IndexTerm(t, e)
   }
 
-  def term[_: P]: P[Seq[Term]] = P(fieldTerm | sliceOrIndexTerm).rep(sep=", ")
+  def term[_: P]: P[Seq[Term]] = P(fieldTerm | sliceOrIndexTerm).rep(sep=",")
 
   def exp: P[_] => P[TermsExp] = term(_: P[_]).map(TermsExp)
 }

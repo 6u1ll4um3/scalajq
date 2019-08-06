@@ -43,32 +43,31 @@ object Operator {
   def setplus[_: P]: P[Unit]      = P("+=")
   def dot[_: P]: P[Unit]          = P(".")
 
-  def enterBracket[_: P]: P[String]   = CharIn("[{(").!
-  def exitBracket[_: P]: P[String]    = CharIn("]})").!
-  def op[_: P]: P[String]             = CharIn(".?=;,:|+-*/%$<>").!
-
   def digits[Any: P]: P[Unit]         = P( CharsWhileIn("0-9") )
   def exponent[Any: P]: P[Unit]       = P( CharIn("eE") ~ CharIn("+\\-").? ~ digits )
   def fractional[Any: P]: P[Unit]     = P( "." ~ digits )
   def integral[Any: P]: P[Unit]       = P( "0" | CharIn("1-9")  ~ digits.? )
 
-  def stringChars(c: Char): Boolean     = c != '\"' && c != '\\'
+  def space[Any: P]: P[Unit]          = P( CharsWhileIn(" \r\n", 0) )
+  def hexDigit[Any: P]: P[Unit]       = P( CharIn("0-9a-fA-F") )
+  def unicodeEscape[Any: P]: P[Unit]  = P( "u" ~ hexDigit ~ hexDigit ~ hexDigit ~ hexDigit )
+  def escape[Any: P]: P[Unit]         = P( "\\" ~ (CharIn("\"/\\\\bfnrt") | unicodeEscape) )
+  def strChars[Any: P]: P[Unit]       = P( CharsWhile(c => c != '\"' && c != '\\') )
 
-  def space[Any: P]: P[Unit]            = P( CharsWhileIn(" \r\n", 0) )
-  def hexDigit[Any: P]: P[Unit]         = P( CharIn("0-9a-fA-F") )
-  def unicodeEscape[Any: P]: P[Unit]    = P( "u" ~ hexDigit ~ hexDigit ~ hexDigit ~ hexDigit )
-  def escape[Any: P]: P[Unit]           = P( "\\" ~ (CharIn("\"/\\\\bfnrt") | unicodeEscape) )
-  def strChars[Any: P]: P[Unit]         = P( CharsWhile(stringChars) )
+  def enterBracket[_: P]: P[String]   = CharIn("[{(").!
+  def exitBracket[_: P]: P[String]    = CharIn("]})").!
+  def op[_: P]: P[String]             = CharIn(".?=;,:|+-*/%$<>").!
 
-  def format[_: P]: P[FormatModel] = "@" ~ CharIn("a-z", "A-Z", "0-9").rep(1).!.map(FormatModel)
+  def format[Any: P]: P[String]       = P( "@" ~ CharIn("a-z", "A-Z", "0-9") ).!
+  def num[Any: P]: P[String]          = P( CharIn("+\\-").? ~ integral ~ fractional.? ~ exponent.? ).!
+  def string[Any: P]: P[String]       = P( space ~ "\"" ~/ (strChars | escape).rep.! ~ "\"" )
+  def field[Any: P]: P[String]        = P( space.? ~ "." ~ (CharIn("a-z", "A-Z", "_") ~ CharIn("a-z", "A-Z", "0-9", "_").rep).! )
 
-  def num[_: P]: P[NumberModel] = P( CharIn("+\\-").? ~ integral ~ fractional.? ~ exponent.? ).!.map(x => NumberModel(x.toDouble))
-
-  def string[_: P]: P[StringModel] = P( space ~ "\"" ~/ (strChars | escape).rep.! ~ "\"").map(StringModel)
-
-  def field[_: P]: P[FieldModel] = P("." ~ (CharIn("a-z", "A-Z", "_") ~ CharIn("a-z", "A-Z", "0-9", "_").rep).!).map(FieldModel)
-
-  def true_[_: P]: P[BooleanModel]   = `true`.map(_ => BooleanModel(true))
-  def false_[_: P]: P[BooleanModel]  = `false`.map(_ => BooleanModel(false))
+  def formatModel[_: P]: P[FormatModel] = format.map(FormatModel)
+  def numModel[_: P]: P[NumberModel]    = num.map(x => NumberModel(x.toDouble))
+  def stringModel[_: P]: P[StringModel] = string.map(StringModel)
+  def fieldModel[_: P]: P[FieldModel]   = field.map(FieldModel)
+  def trueModel[_: P]: P[BooleanModel]  = `true`.map(_ => BooleanModel(true))
+  def falseModel[_: P]: P[BooleanModel] = `false`.map(_ => BooleanModel(false))
 
 }
