@@ -63,11 +63,4 @@ object Operator {
   def string[Any: P]: P[String]       = P( space ~ "\"" ~/ (strChars | escape).rep.! ~ "\"" )
   def field[Any: P]: P[String]        = P( space.? ~ "." ~ (CharIn("a-z", "A-Z", "_") ~ CharIn("a-z", "A-Z", "0-9", "_").rep).! )
 
-  def formatModel[_: P]: P[FormatModel] = format.map(FormatModel)
-  def numModel[_: P]: P[NumberModel]    = num.map(x => NumberModel(x.toDouble))
-  def stringModel[_: P]: P[StringModel] = string.map(StringModel)
-  def fieldModel[_: P]: P[FieldModel]   = field.map(FieldModel)
-  def trueModel[_: P]: P[BooleanModel]  = `true`.map(_ => BooleanModel(true))
-  def falseModel[_: P]: P[BooleanModel] = `false`.map(_ => BooleanModel(false))
-
 }

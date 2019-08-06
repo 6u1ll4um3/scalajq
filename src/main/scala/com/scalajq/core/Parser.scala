@@ -1,15 +1,17 @@
 package com.scalajq.core
 
+import com.scalajq.core.Operator.{`false`, `true`, field, num, string}
 import fastparse.NoWhitespace._
 import fastparse._
 
 object Parser {
 
-  def stringTerm[_: P]: P[StringTerm] = Operator.stringModel.map(s => StringTerm(s.value))
+  def numberTerm[_: P]: P[NumberTerm] = num.map(x => NumberTerm(x.toDouble))
+  def stringTerm[_: P]: P[StringTerm] = string.map(StringTerm)
+  def trueTerm[_: P]: P[BooleanTerm]  = `true`.map(_ => BooleanTerm(true))
+  def falseTerm[_: P]: P[BooleanTerm] = `false`.map(_ => BooleanTerm(false))
 
-  def numberTerm[_: P]: P[NumberTerm] = Operator.numModel.map(NumberTerm)
-
-  def fieldModel[_: P]: P[(FieldModel, Option[String])] = Operator.fieldModel ~ "?".!.?
+  def fieldModel[_: P]: P[(FieldModel, Option[String])]  = field.map(FieldModel) ~ "?".!.?
 
   def fieldTerm[_: P]: P[SeqTerm] = (fieldModel.rep(1) ~ sliceOrIndexModel).rep(1).map { seqField =>
 

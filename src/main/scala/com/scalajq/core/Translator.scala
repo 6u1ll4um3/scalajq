@@ -39,7 +39,8 @@ object Translator {
       case IndexTerm(t, idx)          => indexToFunction(t, idx)
       case SliceTerm(t, start, end)   => sliceToFunction(t, start, end)
       case StringTerm(str)            => constantToFunction(JsString(str))
-      case NumberTerm(n)              => constantToFunction(JsNumber(n.value))
+      //case NumberTerm(n)              => constantToFunction(JsNumber(n.value))
+      case NumberTerm(n)              => constantToFunction(JsNumber(n))
       case NullTerm                   => constantToFunction(JsNull)
       case t                          => throw new Exception(s"termToFunction, term type not manage : $t")
     }
@@ -101,7 +102,7 @@ object Translator {
     term match {
       case _:JsArray => {
         val indices = startIdx until endIdx
-        val functions: Seq[JqFunction] = indices.map(idx => indexToFunction(trm, TermExp(NumberTerm(NumberModel(idx)))))
+        val functions: Seq[JqFunction] = indices.map(idx => indexToFunction(trm, TermExp(NumberTerm(idx))))
         JsArray(functions.map(f => f(input)))
       }
       case JsString(str) => JsString(str.substring(startIdx, endIdx))
