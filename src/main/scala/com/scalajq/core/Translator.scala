@@ -32,14 +32,12 @@ object Translator {
   def termToFunction(term: Term): JqFunction = {
     term match {
       case IdentityTerm               => identityToFunction
-      case FieldTerm(fields)          => composeList(fields.map {
-                                        case (FieldModel(name), _)    => fieldToFunction(JsString(name))
-                                      })
+      case FieldTerm(name)            => fieldToFunction(JsString(name))
+      case SeqFieldTerm(fields)       => composeList(fields.map(f => fieldToFunction(JsString(f.name))))
       case SeqTerm(terms)             => seqToFunction(terms)
       case IndexTerm(t, idx)          => indexToFunction(t, idx)
       case SliceTerm(t, start, end)   => sliceToFunction(t, start, end)
       case StringTerm(str)            => constantToFunction(JsString(str))
-      //case NumberTerm(n)              => constantToFunction(JsNumber(n.value))
       case NumberTerm(n)              => constantToFunction(JsNumber(n))
       case NullTerm                   => constantToFunction(JsNull)
       case t                          => throw new Exception(s"termToFunction, term type not manage : $t")
@@ -112,7 +110,7 @@ object Translator {
 
   def constantToFunction(value: JsValue) = JqFunction { _ => value }
 
-  def composeList(lst: List[JqFunction]): JqFunction = lst.foldLeft(identityToFunction) {
+  def composeList(lst: Seq[JqFunction]): JqFunction = lst.foldLeft(identityToFunction) {
     (acc, next) => JqFunction { input =>
       val previousResult = acc(input)
       next(previousResult)

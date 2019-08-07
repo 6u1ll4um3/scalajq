@@ -3,7 +3,7 @@ package com.scalajq
 import org.scalatest._
 import play.api.libs.json._
 
-class JqTest extends FlatSpec with MustMatchers with BaseTest {
+class BasicFiltersTest extends FlatSpec with MustMatchers with BaseTest {
 
   val json: JsValue = Json.parse(jsStarWars)
   val jsCharacters = Json.parse(characters.stripMargin)
