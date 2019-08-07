@@ -10,22 +10,21 @@ object Translator {
 
   val identityToFunction = JqFunction(input => input )
 
-  def run(exp: Exp, input: JsValue): JsValue = {
-    exp match {
-      case TermsExp(ts) if ts.tail.nonEmpty     => termsToFunction(ts, input)
-      case TermsExp(ts) if ts.tail.isEmpty      => termToFunction(ts.head)(input)
-      case TermExp(t)                           => termToFunction(t)(input)
-      case e                                    => throw new Exception(s"run, unable to handle expression $e")
+  def run(seq: SeqTerm, input: JsValue): JsValue = {
+    seq match {
+      case SeqTerm(ts) if ts.tail.nonEmpty     => termsToJsArray(ts, input)
+      case SeqTerm(ts) if ts.tail.isEmpty      => termToFunction(ts.head)(input)
+      case e                                   => throw new Exception(s"run, unable to handle expression $e")
     }
   }
 
-  def termsToFunction(terms: Seq[Term], input: JsValue): JsArray = {
+  def termsToJsArray(terms: Seq[Term], input: JsValue): JsArray = {
 
     val headTerm: JsValue = termToFunction(terms.head)(input)
     if (terms.tail.isEmpty) {
       Json.arr(headTerm)
     } else {
-      headTerm +: termsToFunction(terms.tail, input)
+      headTerm +: termsToJsArray(terms.tail, input)
     }
   }
 
@@ -52,15 +51,10 @@ object Translator {
     }
   }
 
-  def expToFunction(exp: Exp): JqFunction = exp match {
-    case TermExp(term)     => termToFunction(term)
-    case e                 => throw new Exception(s"expToFunction, unable to handle expression $e")
-  }
-
-  def indexToFunction(term: Term, index: Exp) = JqFunction { input =>
+  def indexToFunction(term: Term, index: Term) = JqFunction { input =>
 
     val termFunction = termToFunction(term)
-    val indexFunction = expToFunction(index)
+    val indexFunction = termToFunction(index)
     val trm = termFunction(input)
     val idx = indexFunction(trm)
 
@@ -87,22 +81,22 @@ object Translator {
     }
   }
 
-  def sliceToFunction(trm: Term, startExp: Exp, endExp: Exp) = JqFunction { input =>
+  def sliceToFunction(trm: Term, startExp: Term, endExp: Term) = JqFunction { input =>
 
     val termFunction = termToFunction(trm)
-    val startFunction = expToFunction(startExp)
-    val endFunction = expToFunction(endExp)
+    val startFunction = termToFunction(startExp)
+    val endFunction = termToFunction(endExp)
     val term: JsValue = termFunction(input)
 
     val startIdx = startFunction(term).asOpt[Int].getOrElse(throw new Exception("sliceToFunction, Int expected"))
     val endIdx = endFunction(term).asOpt[Int].getOrElse(throw new Exception("sliceToFunction, Int expected"))
 
     term match {
-      case _:JsArray => {
+      case _:JsArray =>
         val indices = startIdx until endIdx
-        val functions: Seq[JqFunction] = indices.map(idx => indexToFunction(trm, TermExp(NumberTerm(idx))))
+        val functions: Seq[JqFunction] = indices.map(idx => indexToFunction(trm, NumberTerm(idx)))
         JsArray(functions.map(f => f(input)))
-      }
+
       case JsString(str) => JsString(str.substring(startIdx, endIdx))
       case e => throw new Exception(s"sliceToFunction, input $e not supported")
     }

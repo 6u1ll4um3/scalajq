@@ -24,8 +24,8 @@ object Parser {
   def sliceOrIndexTerm[_: P]: P[Term] = P(Operator.dot ~ sliceOrIndexModel).map(m => wrapTerm(IdentityTerm, m))
 
   def sliceOrIndexModel[_: P]: P[Option[SliceOrIndexModel]] = P("[" ~ (stringTerm | numberTerm) ~ ":".? ~ numberTerm.? ~ "]").map {
-    case (n1, Some(n2))   => SliceOrIndexModel(TermExp(n1), Some(TermExp(n2)))
-    case (n1, None)       => SliceOrIndexModel(TermExp(n1), None)
+    case (n1, Some(n2))   => SliceOrIndexModel(n1, Some(n2))
+    case (n1, None)       => SliceOrIndexModel(n1, None)
   }.?
 
   def wrapTerm(t: Term, idx: Option[Model]): Term = idx match {
@@ -34,7 +34,8 @@ object Parser {
     case Some(SliceOrIndexModel(e, None)) => IndexTerm(t, e)
   }
 
-  def term[_: P]: P[Seq[Term]] = P(fieldTerm | sliceOrIndexTerm).rep(sep=",")
+  def terms[_: P]: P[Seq[Term]] = P(fieldTerm | sliceOrIndexTerm).rep(sep=",")
 
-  def exp: P[_] => P[TermsExp] = term(_: P[_]).map(TermsExp)
+  def exp: P[_] => P[SeqTerm] = terms(_: P[_]).map(SeqTerm)
+
 }
