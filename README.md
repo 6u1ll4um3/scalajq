@@ -7,7 +7,7 @@
 *  [com.typesafe.play](https://www.playframework.com/)
 
 ##Supported syntax
-* Identity: `.
+* Identity: `.`
 * Object Identifier-Index: `.foo`, `.foo.bar`
 * Generic Object Index: `.[<string>]`
 * Array Index: `.[2]`
@@ -17,7 +17,7 @@
 
 ##Usage
 ```scala
-import play.api.libs.json._
+import play.api.libs.json.{ Json, JsValue }
 import com.scalajq.JQ
 
 val json: JsValue = Json.parse(s"""
