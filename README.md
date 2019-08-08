@@ -1,12 +1,12 @@
-#Scala jq
+# Scala jq
 
 [jq](https://stedolan.github.io/jq/) for Scala
 
-##Using 
+## Using 
 *  [com.lihaoyi.fastparse](https://github.com/lihaoyi/fastparse/)
 *  [com.typesafe.play](https://www.playframework.com/)
 
-##Supported syntax
+## Supported syntax
 * Identity: `.`
 * Object Identifier-Index: `.foo`, `.foo.bar`
 * Optional Object Identifier-Index: `.foo?`
@@ -16,7 +16,7 @@
 * Array/Object Value Iterator: `.[]`
 * Comma: `,`
 
-##Usage
+## Usage
 ```scala
 import play.api.libs.json.{ Json, JsValue }
 import com.scalajq.JQ
