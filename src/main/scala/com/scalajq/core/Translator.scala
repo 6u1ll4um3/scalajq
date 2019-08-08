@@ -29,17 +29,18 @@ object Translator {
   }
 
   def termToFunction(term: Term): JqFunction = {
+
     term match {
-      case IdentityTerm               => identityToFunction
-      case FieldTerm(name)            => fieldToFunction(JsString(name))
-      case SeqFieldTerm(fields)       => composeList(fields.map(f => fieldToFunction(JsString(f.name))))
-      case SeqTerm(terms)             => seqToFunction(terms)
-      case IndexTerm(t, idx)          => indexToFunction(t, idx)
-      case SliceTerm(t, start, end)   => sliceToFunction(t, start, end)
-      case StringTerm(str)            => constantToFunction(JsString(str))
-      case NumberTerm(n)              => constantToFunction(JsNumber(n))
-      case NullTerm                   => constantToFunction(JsNull)
-      case t                          => throw new Exception(s"termToFunction, term type not manage : $t")
+      case IdentityTerm                     => identityToFunction
+      case FieldTerm(name, opt)             => fieldToFunction(JsString(name), opt)
+      case SeqFieldTerm(fields)             => composeList(fields.map(f => fieldToFunction(JsString(f.name), f.optional)))
+      case SeqTerm(terms)                   => seqToFunction(terms)
+      case IndexTerm(t, idx, opt)           => indexToFunction(t, idx, opt)
+      case SliceTerm(t, start, end, opt)    => sliceToFunction(t, start, end, opt)
+      case StringTerm(str)                  => constantToFunction(JsString(str))
+      case NumberTerm(n)                    => constantToFunction(JsNumber(n))
+      case NullTerm                         => constantToFunction(JsNull)
+      case t                                => throw new Exception(s"termToFunction, term type not manage : $t")
     }
   }
 
@@ -51,17 +52,17 @@ object Translator {
     }
   }
 
-  def indexToFunction(term: Term, index: Term) = JqFunction { input =>
+  def indexToFunction(term: Term, index: Term, opt: Option[String]) = JqFunction { input =>
 
     val termFunction = termToFunction(term)
     val indexFunction = termToFunction(index)
     val trm = termFunction(input)
     val idx = indexFunction(trm)
 
-    fieldToFunction(idx)(trm)
+    fieldToFunction(idx, opt)(trm)
   }
 
-  def fieldToFunction(field: JsValue): JqFunction = JqFunction { input =>
+  def fieldToFunction(field: JsValue, optional: Option[String]): JqFunction = JqFunction { input =>
 
     field match {
       case JsNumber(n) =>
@@ -74,14 +75,19 @@ object Translator {
             } else {
               JsNull
             }
-          case e => throw new Exception(s"fieldToFunction, input $e not supported, $field")
+          case _ if optional.contains("?") => JsNull
+          case e => throw new IllegalArgumentException(s"fieldToFunction, input $e not supported, $field")
         }
-      case JsString(str) => (input \ str).toOption.getOrElse(throw new Exception(s"fieldToFunction, unable to get field"))
+      case JsString(str) => (input \ str).toOption match {
+        case Some(s)                         => s
+        case None if optional.contains("?")  => JsNull
+        case _ => throw new IllegalArgumentException(s"fieldToFunction, unable to get field")
+      }
       case e  => throw new Exception(s"fieldToFunction, field not supported $e")
     }
   }
 
-  def sliceToFunction(trm: Term, startExp: Term, endExp: Term) = JqFunction { input =>
+  def sliceToFunction(trm: Term, startExp: Term, endExp: Term, opt: Option[String]) = JqFunction { input =>
 
     val termFunction = termToFunction(trm)
     val startFunction = termToFunction(startExp)
@@ -94,7 +100,7 @@ object Translator {
     term match {
       case _:JsArray =>
         val indices = startIdx until endIdx
-        val functions: Seq[JqFunction] = indices.map(idx => indexToFunction(trm, NumberTerm(idx)))
+        val functions: Seq[JqFunction] = indices.map(idx => indexToFunction(trm, NumberTerm(idx), opt))
         JsArray(functions.map(f => f(input)))
 
       case JsString(str) => JsString(str.substring(startIdx, endIdx))

@@ -50,6 +50,17 @@ class BasicFiltersTest extends FlatSpec with MustMatchers with BaseTest {
     )
   }
 
+  "ScalaJq" should "test Optional Object Identifier-Index" in {
+    intercept[IllegalArgumentException] {
+      JQ(json, ".nam")
+    }
+    intercept[IllegalArgumentException] {
+      JQ(json, ".name[1]")
+    }
+    JQ(json, ".name[1]?") mustBe JsNull
+    JQ(json, ".nam?") mustBe JsNull
+  }
+
   "ScalaJq" should "resolve Object Identifier-Index two times, with Array Index" in {
     JQ(json, ".characters[0].name") mustBe JsString("Yoda")
   }

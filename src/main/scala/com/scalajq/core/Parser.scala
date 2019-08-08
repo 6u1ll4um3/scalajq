@@ -1,6 +1,6 @@
 package com.scalajq.core
 
-import com.scalajq.core.Operator.{`false`, `true`, field, num, string}
+import com.scalajq.core.Operator._
 import fastparse.NoWhitespace._
 import fastparse._
 
@@ -14,24 +14,26 @@ object Parser {
 
   def falseTerm[_: P]: P[BooleanTerm] = `false`.map(_ => BooleanTerm(false))
 
-  def fieldTerm[_: P]: P[SeqTerm] = (field.rep(1) ~ sliceOrIndexModel).rep(1).map { seqField =>
+  def sliceOrIndexModel[_: P]: P[Option[SliceOrIndexModel]] =
+    P("[" ~ (stringTerm | numberTerm) ~ ":".? ~ numberTerm.? ~ "]" ~ optional).map {
+      case (n1, Some(n2), n3)   => SliceOrIndexModel(n1, Some(n2), n3)
+      case (n1, None, n3)       => SliceOrIndexModel(n1, None, n3)
+    }.?
+
+  def fieldTerm[_: P]: P[SeqTerm] = ((field ~ optional).rep(1) ~ sliceOrIndexModel).rep(1).map { seqField =>
     val seqTerm: Seq[Term] = seqField.map { s =>
-      wrapTerm(SeqFieldTerm(s._1.map(FieldTerm)), s._2)
+      wrapTerm(SeqFieldTerm(s._1.map(t => FieldTerm(t._1, t._2))), s._2)
     }
+
     SeqTerm(seqTerm)
   }
 
   def sliceOrIndexTerm[_: P]: P[Term] = P(Operator.dot ~ sliceOrIndexModel).map(m => wrapTerm(IdentityTerm, m))
 
-  def sliceOrIndexModel[_: P]: P[Option[SliceOrIndexModel]] = P("[" ~ (stringTerm | numberTerm) ~ ":".? ~ numberTerm.? ~ "]").map {
-    case (n1, Some(n2))   => SliceOrIndexModel(n1, Some(n2))
-    case (n1, None)       => SliceOrIndexModel(n1, None)
-  }.?
-
   def wrapTerm(t: Term, idx: Option[Model]): Term = idx match {
     case None => t
-    case Some(SliceOrIndexModel(e1, Some(e2))) => SliceTerm(t, e1, e2)
-    case Some(SliceOrIndexModel(e, None)) => IndexTerm(t, e)
+    case Some(SliceOrIndexModel(e1, Some(e2), e3)) => SliceTerm(t, e1, e2, e3)
+    case Some(SliceOrIndexModel(e, None, e3)) => IndexTerm(t, e, e3)
   }
 
   def terms[_: P]: P[Seq[Term]] = P(fieldTerm | sliceOrIndexTerm).rep(sep=",")

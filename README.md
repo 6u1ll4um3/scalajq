@@ -9,6 +9,7 @@
 ##Supported syntax
 * Identity: `.`
 * Object Identifier-Index: `.foo`, `.foo.bar`
+* Optional Object Identifier-Index: `.foo?`
 * Generic Object Index: `.[<string>]`
 * Array Index: `.[2]`
 * Array/String Slice: `.[10:15]`
