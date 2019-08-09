@@ -10,6 +10,14 @@ object Translator {
 
   val identityToFunction = JqFunction(input => input )
 
+  def run(combine: CombineTerm, input: JsValue): JsValue = {
+    combine match {
+      case CombineTerm(ts) if ts.tail.nonEmpty  => run(CombineTerm(combine.seqTerms.tail), run(combine.seqTerms.head, input))
+      case CombineTerm(ts) if ts.tail.isEmpty   => run(combine.seqTerms.head, input)
+      case e                                    => throw new Exception(s"run combine, unable to handle expression $e")
+    }
+  }
+
   def run(seq: SeqTerm, input: JsValue): JsValue = {
     seq match {
       case SeqTerm(ts) if ts.tail.nonEmpty     => termsToJsArray(ts, input)

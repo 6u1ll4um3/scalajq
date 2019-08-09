@@ -39,8 +39,8 @@ object Parser {
     case Some(SliceOrIndexModel(start, None, optional)) => IndexTerm(term, start, optional)
   }
 
-  def terms[_: P]: P[Seq[Term]] = P(fieldTerm | sliceOrIndexTerm).rep(sep=",")
+  def terms[_: P]: P[Seq[Seq[Term]]] = ((fieldTerm | sliceOrIndexTerm) ~ " ".rep).rep(sep=",").rep(sep = "|")
 
-  def exp: P[_] => P[SeqTerm] = terms(_: P[_]).map(SeqTerm)
+  def exp: P[_] => P[CombineTerm] = terms(_: P[_]).map(t => CombineTerm(t.map(SeqTerm)))
 
 }

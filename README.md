@@ -2,7 +2,7 @@
 
 [jq](https://stedolan.github.io/jq/) for Scala
 
-## Using 
+Library used :
 *  [com.lihaoyi.fastparse](https://github.com/lihaoyi/fastparse/)
 *  [com.typesafe.play](https://www.playframework.com/)
 
@@ -15,6 +15,7 @@
 * Array/String Slice: `.[10:15]`
 * Array/Object Value Iterator: `.[]`
 * Comma: `,`
+* Pipe: `|`
 
 ## Usage
 ```scala

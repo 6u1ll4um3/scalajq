@@ -113,9 +113,9 @@ class BasicFiltersTest extends FlatSpec with MustMatchers with BaseTest {
       Json.arr("Star Wars", "Lucas", 1944, "in a galaxy far far away")
   }
 
-//  "ScalaJq" should "resolve | operator combining two filters" in {
-//    JQ(jsCharacters, ".[] | .name") mustBe
-//      Json.arr("Yoda", "Rey", "Obi-Wan Kenobi", "Luke Skywalker", "Han Solo")
-//  }
+  "ScalaJq" should "resolve Pipe operator combining two filters" in {
+    JQ(jsCharacters, ".[1] | .name") mustBe JsString("Rey")
+    //JQ(jsCharacters, ".[1:2] | .name") mustBe JsString("Rey")  //FIXME : fieldToFunction
+  }
 
 }
