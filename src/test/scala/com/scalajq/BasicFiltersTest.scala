@@ -94,9 +94,7 @@ class BasicFiltersTest extends FlatSpec with MustMatchers with BaseTest {
       Json.obj("name"-> "Blaster")
     )
 
-//    JQ(json, ".characters[1].weapons[].name") mustBe Json.arr(
-//      "Quarterstaff", "Lightsaber", "Blaster"
-//    )
+    JQ(json, ".characters[1].weapons[].name") mustBe Json.arr("Quarterstaff", "Lightsaber", "Blaster")
   }
 
   "ScalaJq" should "resolve Object Identifier-Index separated by a comma" in {
@@ -105,6 +103,7 @@ class BasicFiltersTest extends FlatSpec with MustMatchers with BaseTest {
   }
 
   "ScalaJq" should "resolve Pipe operator combining filters" in {
+    JQ(jsCharacters, ".[] | .name") mustBe Json.arr("Yoda","Rey","Obi-Wan Kenobi","Luke Skywalker","Han Solo")
     JQ(jsCharacters, ".[1] | .name") mustBe JsString("Rey")
     JQ(jsCharacters, ".[1:3] | .name") mustBe Json.arr("Rey", "Obi-Wan Kenobi")
     JQ(json, ".characters[0:2] | .name") mustBe Json.arr("Yoda", "Rey")

@@ -14,12 +14,13 @@ object Parser {
 
   def stringTerm[_: P]: P[StringTerm] = string.map(StringTerm)
 
-  def sliceOrIndex[_: P]: P[(Term, Option[NumberTerm], Option[String])] =
-    "[" ~ (stringTerm | numberTerm) ~ ":".? ~ numberTerm.? ~ "]" ~ optional
+  def sliceOrIndex[_: P]: P[(Option[Term], Option[NumberTerm], Option[String])] =
+    "[" ~ (stringTerm | numberTerm).? ~ ":".? ~ numberTerm.? ~ "]" ~ optional
 
   def sliceOrIndexModel[_: P]: P[Option[SliceOrIndexModel]] = sliceOrIndex.map {
-    case (n1, Some(n2), n3)   => SliceOrIndexModel(n1, Some(n2), n3)
-    case (n1, None, n3)       => SliceOrIndexModel(n1, None, n3)
+    case (Some(n1), Some(n2), n3)   => SliceOrIndexModel(n1, Some(n2), n3)
+    case (Some(n1), None, n3)       => SliceOrIndexModel(n1, None, n3)
+    case _                          => SliceOrIndexModel(NullTerm, None, None)
   }.?
 
   def fieldWithSlice[_: P]: P[Seq[(Seq[(String, Option[String])], Option[SliceOrIndexModel])]] =

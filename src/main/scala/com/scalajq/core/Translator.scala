@@ -101,7 +101,8 @@ object Translator {
             case _ => optionalResult(optional, field, input)
           }
       }
-      case e  => throw new Exception(s"fieldToFunction, field $e not supported")
+      case JsNull => input
+      case e      => throw new Exception(s"fieldToFunction, field $e not supported")
     }
   }
 
