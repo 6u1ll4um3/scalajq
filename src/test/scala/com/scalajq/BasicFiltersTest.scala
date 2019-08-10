@@ -34,18 +34,14 @@ class BasicFiltersTest extends FlatSpec with MustMatchers with BaseTest {
     )
   }
 
+  "ScalaJq" should "resolve Object Identifier" in {
+    JQ(json, ".author.lastName") mustBe JsString("Lucas")
+    JQ(json, ".author.born.year") mustBe JsNumber(1944)
+  }
+
   "ScalaJq" should "resolve Array Index" in {
     JQ(jsCharacters, ".[0]") mustBe Json.obj(
       "name" -> "Yoda",
-      "gender" -> "male"
-    )
-  }
-
-  "ScalaJq" should "resolve Object Identifier-Index with Array Index" in {
-    JQ(json, ".characters[0]") mustBe Json.obj(
-      "name" -> "Yoda",
-      "appearance" -> 1980,
-      "species" -> JsNull,
       "gender" -> "male"
     )
   }
@@ -61,24 +57,17 @@ class BasicFiltersTest extends FlatSpec with MustMatchers with BaseTest {
     JQ(json, ".nam?") mustBe JsNull
   }
 
-  "ScalaJq" should "resolve Object Identifier-Index two times, with Array Index" in {
+  "ScalaJq" should "resolve Object Identifier-Index with Array Index/String Slice" in {
+    JQ(json, ".characters[0]") mustBe Json.obj(
+      "name" -> "Yoda",
+      "appearance" -> 1980,
+      "species" -> JsNull,
+      "gender" -> "male"
+    )
+
     JQ(json, ".characters[0].name") mustBe JsString("Yoda")
-  }
-
-  "ScalaJq" should "resolve Object Identifier-Index two times, with Array Index, with String Slice" in {
-    JQ(json, ".characters[0].name[0:2]") mustBe JsString("Yo")
-  }
-
-  "ScalaJq" should "resolve Object Identifier-Index two times" in {
-    JQ(json, ".author.lastName") mustBe JsString("Lucas")
-  }
-
-  "ScalaJq" should "resolve Object Identifier-Index three times" in {
-    JQ(json, ".author.born.year") mustBe JsNumber(1944)
-  }
-
-  "ScalaJq" should "resolve Object Identifier-Index three times, with two Array Index" in {
     JQ(json, ".characters[1].weapons[2].name") mustBe JsString("Blaster")
+    JQ(json, ".characters[0].name[0:2]") mustBe JsString("Yo")
   }
 
   "ScalaJq" should "resolve Generic Object Index" in {
@@ -93,19 +82,21 @@ class BasicFiltersTest extends FlatSpec with MustMatchers with BaseTest {
     )
   }
 
-  "ScalaJq" should "resolve Object Identifier-Index two times, with Array Index and Array Slice" in {
+  "ScalaJq" should "resolve Object Identifier-Index with Array Index/Array Slice" in {
     JQ(json, ".characters[1].weapons[0:2]") mustBe Json.arr(
       Json.obj("name"-> "Quarterstaff"),
       Json.obj("name"-> "Lightsaber")
     )
-  }
 
-  "ScalaJq" should "resolve Object Identifier-Index two times, with Array Index and Array Slice empty" in {
     JQ(json, ".characters[1].weapons[]") mustBe Json.arr(
       Json.obj("name"-> "Quarterstaff"),
       Json.obj("name"-> "Lightsaber"),
       Json.obj("name"-> "Blaster")
     )
+
+//    JQ(json, ".characters[1].weapons[].name") mustBe Json.arr(
+//      "Quarterstaff", "Lightsaber", "Blaster"
+//    )
   }
 
   "ScalaJq" should "resolve Object Identifier-Index separated by a comma" in {
@@ -113,9 +104,24 @@ class BasicFiltersTest extends FlatSpec with MustMatchers with BaseTest {
       Json.arr("Star Wars", "Lucas", 1944, "in a galaxy far far away")
   }
 
-  "ScalaJq" should "resolve Pipe operator combining two filters" in {
+  "ScalaJq" should "resolve Pipe operator combining filters" in {
     JQ(jsCharacters, ".[1] | .name") mustBe JsString("Rey")
-    //JQ(jsCharacters, ".[1:2] | .name") mustBe JsString("Rey")  //FIXME : fieldToFunction
+    JQ(jsCharacters, ".[1:3] | .name") mustBe Json.arr("Rey", "Obi-Wan Kenobi")
+    JQ(json, ".characters[0:2] | .name") mustBe Json.arr("Yoda", "Rey")
+
+    JQ(json, ".characters[0:2] | .weapons?") mustBe Json.arr(
+      JsNull,
+      Json.arr(
+        Json.obj("name"-> "Quarterstaff"),
+        Json.obj("name"-> "Lightsaber"),
+        Json.obj("name"-> "Blaster")
+    ))
+
+    JQ(json, ".author | .born | .year") mustBe JsNumber(1944)
+
+    intercept[IllegalArgumentException] {
+      JQ(json, ".characters[0:2] | .weapons")
+    }
   }
 
 }

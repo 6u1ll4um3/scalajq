@@ -70,6 +70,13 @@ object Translator {
     fieldToFunction(idx, opt)(trm)
   }
 
+  def optionalResult(optional: Option[String], field: JsValue, input: JsValue): JsValue = {
+    optional match {
+      case Some("?")  => JsNull
+      case _          => throw new IllegalArgumentException(s"input $input not supported, $field")
+    }
+  }
+
   def fieldToFunction(field: JsValue, optional: Option[String]): JqFunction = JqFunction { input =>
 
     field match {
@@ -83,15 +90,18 @@ object Translator {
             } else {
               JsNull
             }
-          case _ if optional.contains("?") => JsNull
-          case e => throw new IllegalArgumentException(s"fieldToFunction, input $e not supported, $field")
+          case _ => optionalResult(optional, field, input)
         }
       case JsString(str) => (input \ str).toOption match {
-        case Some(s)                         => s
-        case None if optional.contains("?")  => JsNull
-        case _ => throw new IllegalArgumentException(s"fieldToFunction, unable to get field")
+        case Some(s) => s
+        case _ =>
+          input  match {
+            case JsArray(value) =>
+              JsArray(value.map(node => (node \ str).toOption.getOrElse(optionalResult(optional, field, input))))
+            case _ => optionalResult(optional, field, input)
+          }
       }
-      case e  => throw new Exception(s"fieldToFunction, field not supported $e")
+      case e  => throw new Exception(s"fieldToFunction, field $e not supported")
     }
   }
 
