@@ -16,6 +16,7 @@ Library used :
 * Array/Object Value Iterator: `.[]`
 * Comma: `,`
 * Pipe: `|`
+* Object Construction: `{}`
 
 ## Usage
 ```scala
@@ -66,5 +67,6 @@ JQ(json, ".characters[1].weapons[2].name") // return JsString("Blaster")
 JQ(json, ".characters[1].weapons[].name")  // return Json.arr("Quarterstaff", "Lightsaber", "Blaster")
 JQ(json, ".characters[0:2] | .name")       // return Json.arr("Yoda", "Rey")
 JQ(json, ".name, .author.lastName, .author.born.year, .place") // return Json.arr("Star Wars", "Lucas", 1944, "in a galaxy far far away")
+JQ(json, "{name: .name, director: .author.lastName}") // return Json.obj("name" -> "Star Wars", "director" -> "Lucas")
 
 ```

@@ -54,13 +54,13 @@ object Operator {
   def escape[Any: P]: P[Unit]         = P( "\\" ~ (CharIn("\"/\\\\bfnrt") | unicodeEscape) )
   def strChars[Any: P]: P[Unit]       = P( CharsWhile(c => c != '\"' && c != '\\') )
 
-  def enterBracket[_: P]: P[String]   = CharIn("{(").!
-  def exitBracket[_: P]: P[String]    = CharIn("})").!
+  def enterBracket[_: P]: P[String]   = CharIn("{").!
+  def exitBracket[_: P]: P[String]    = CharIn("}").!
   def op[_: P]: P[String]             = CharIn("=;:|+-*/%$<>").!
 
   def format[Any: P]: P[String]       = P( "@" ~ CharIn("a-z", "A-Z", "0-9") ).!
   def num[Any: P]: P[String]          = P( CharIn("+\\-").? ~ integral ~ fractional.? ~ exponent.? ).!
-  def string[Any: P]: P[String]       = P( space ~ "\"" ~/ (strChars | escape).rep.! ~ "\"" )
+  def string[Any: P]: P[String]       = P( "\"" ~/ (strChars | escape).rep.! ~ "\"" )
   def field[Any: P]: P[String]        = P( space.? ~ "." ~ (CharIn("a-z", "A-Z", "_") ~ CharIn("a-z", "A-Z", "0-9", "_").rep).! )
 
   def optional[_: P]: P[Option[String]] = P("?".!.?)

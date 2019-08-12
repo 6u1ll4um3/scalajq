@@ -1,9 +1,14 @@
 package com.scalajq.core
 
+sealed trait Output
+case class Object(nodes: Seq[Pair]) extends Output
+case class Filters(terms: Seq[SeqTerm]) extends Output
+
+case class Pair(name: String, filters: Filters)
+
 sealed trait Term
 case object NullTerm extends Term
 case object IdentityTerm extends Term
-case class CombineTerm(seqTerms: Seq[SeqTerm]) extends Term
 case class SeqTerm(terms: Seq[Term]) extends Term
 case class FieldTerm(name: String, optional: Option[String]) extends Term
 case class SeqFieldTerm(fields: Seq[FieldTerm]) extends Term

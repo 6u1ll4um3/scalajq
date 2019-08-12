@@ -1,6 +1,6 @@
 package com.scalajq.core
 
-import play.api.libs.json.{JsArray, JsNull, JsNumber, JsString, JsValue, Json}
+import play.api.libs.json.{JsArray, JsNull, JsNumber, JsObject, JsString, JsValue, Json}
 
 case class JqFunction(fn: JsValue => JsValue) {
   def apply(in: JsValue): JsValue = fn(in)
@@ -10,15 +10,27 @@ object Translator {
 
   val identityToFunction = JqFunction(input => input )
 
-  def run(combine: CombineTerm, input: JsValue): JsValue = {
-    combine match {
-      case CombineTerm(ts) if ts.tail.nonEmpty  => run(CombineTerm(combine.seqTerms.tail), run(combine.seqTerms.head, input))
-      case CombineTerm(ts) if ts.tail.isEmpty   => run(combine.seqTerms.head, input)
-      case e                                    => throw new Exception(s"run combine, unable to handle expression $e")
+  def run(output: Output, input: JsValue): JsValue = {
+    output match {
+      case o:Object => buildObject(o, input: JsValue)
+      case f:Filters => buildFilters(f, input: JsValue)
     }
   }
 
-  def run(seq: SeqTerm, input: JsValue): JsValue = {
+  def buildObject(obj: Object, input: JsValue): JsValue = {
+    val jsElem: Seq[JsObject] = obj.nodes.map(n => Json.obj(n.name -> buildFilters(n.filters, input)))
+    jsElem.foldLeft(Json.obj())((a,b) => a ++ b)
+  }
+
+  def buildFilters(filters: Filters, input: JsValue): JsValue = {
+    filters match {
+      case Filters(ts) if ts.tail.nonEmpty  => buildFilters(Filters(filters.terms.tail), buildTerms(filters.terms.head, input))
+      case Filters(ts) if ts.tail.isEmpty   => buildTerms(filters.terms.head, input)
+      case e                                => throw new Exception(s"run combine, unable to handle expression $e")
+    }
+  }
+
+  def buildTerms(seq: SeqTerm, input: JsValue): JsValue = {
     seq match {
       case SeqTerm(ts) if ts.tail.nonEmpty     => termsToJsArray(ts, input)
       case SeqTerm(ts) if ts.tail.isEmpty      => termToFunction(ts.head)(input)

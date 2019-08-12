@@ -123,4 +123,11 @@ class BasicFiltersTest extends FlatSpec with MustMatchers with BaseTest {
     }
   }
 
+  "ScalaJq" should "build Object" in {
+    JQ(json, "{name: .name, place: .place, director: .author.lastName}") mustBe Json.obj(
+      "name" -> "Star Wars",
+      "place" -> "in a galaxy far far away",
+      "director" -> "Lucas")
+  }
+
 }
