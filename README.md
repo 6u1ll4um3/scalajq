@@ -17,6 +17,7 @@ Library used :
 * Comma: `,`
 * Pipe: `|`
 * Object Construction: `{}`
+* Recursive Descent: `..`
 
 ## Usage
 ```scala

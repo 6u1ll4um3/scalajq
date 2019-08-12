@@ -60,8 +60,14 @@ object Translator {
       case StringTerm(str)                  => constantToFunction(JsString(str))
       case NumberTerm(n)                    => constantToFunction(JsNumber(n))
       case NullTerm                         => constantToFunction(JsNull)
+      case RecTerm                          => recursiveToFunction()
       case t                                => throw new Exception(s"termToFunction, term type not manage : $t")
     }
+  }
+
+  def recursiveToFunction(): JqFunction = JqFunction {
+    case JsArray(value) => recursiveToFunction()(value.head)
+    case value          => value
   }
 
   def seqToFunction(terms: Seq[Term]): JqFunction = JqFunction { input =>

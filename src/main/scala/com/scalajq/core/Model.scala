@@ -8,6 +8,7 @@ case class Pair(name: String, filters: Filters)
 
 sealed trait Term
 case object NullTerm extends Term
+case object RecTerm extends Term
 case object IdentityTerm extends Term
 case class SeqTerm(terms: Seq[Term]) extends Term
 case class FieldTerm(name: String, optional: Option[String]) extends Term

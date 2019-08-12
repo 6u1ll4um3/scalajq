@@ -7,6 +7,8 @@ import fastparse._
 
 object FilterParser {
 
+  private def recursiveTerm[_: P]: P[RecTerm.type] = rec.map(_ => RecTerm)
+
   private def numberTerm[_: P]: P[NumberTerm] = num.map(x => NumberTerm(x.toDouble))
 
   private def stringTerm[_: P]: P[StringTerm] = string.map(StringTerm)
@@ -37,7 +39,12 @@ object FilterParser {
     case Some(SliceOrIndexModel(start, None, optional)) => IndexTerm(term, start, optional)
   }
 
-  private def seqTerm[_: P]: P[Seq[Seq[Term]]] = ((fieldTerm | sliceOrIndexTerm) ~ " ".rep).rep(sep=",").rep(sep = "|")
+  private def seqTerm[_: P]: P[Seq[Seq[Term]]] = (
+    (
+      recursiveTerm |
+      fieldTerm |
+      sliceOrIndexTerm
+    ) ~ " ".rep).rep(sep=",").rep(sep = "|")
 
   def filters[_: P]: P[Filters] = seqTerm.map(t => Filters(t.map(SeqTerm)))
 

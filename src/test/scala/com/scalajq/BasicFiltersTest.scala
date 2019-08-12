@@ -128,6 +128,24 @@ class BasicFiltersTest extends FlatSpec with MustMatchers with BaseTest {
       "name" -> "Star Wars",
       "place" -> "in a galaxy far far away",
       "director" -> "Lucas")
+
+    JQ(json, "{characterNames:.characters[0:2]|.name}") mustBe Json.obj(
+      "characterNames" -> Json.arr("Yoda", "Rey")
+    )
+
+    JQ(json, "{ characterNames : .characters[0:2] | .name }") mustBe Json.obj(
+      "characterNames" -> Json.arr("Yoda", "Rey")
+    )
+
+    JQ(json, "{name: .name, place: .place, author: .author.lastName, .author.born.year}") mustBe Json.obj(
+      "name" -> "Star Wars",
+      "place" -> "in a galaxy far far away",
+      "author" -> Json.arr("Lucas", 1944)
+    )
+  }
+
+  "ScalaJq" should "resolve Recursive Descent" in {
+    JQ(Json.parse("""[[{"name":"Star Wars"}]]"""), ".. | .name?") mustBe JsString("Star Wars")
   }
 
 }
