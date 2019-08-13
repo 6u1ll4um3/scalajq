@@ -1,10 +1,11 @@
 package com.scalajq.core
 
 sealed trait Output
+case class Array(filters: Filter) extends Output
 case class Object(nodes: Seq[Pair]) extends Output
-case class Filters(terms: Seq[SeqTerm]) extends Output
+case class Filter(terms: Seq[SeqTerm]) extends Output
 
-case class Pair(name: String, filters: Filters)
+case class Pair(name: String, filters: Filter)
 
 sealed trait Term
 case object NullTerm extends Term

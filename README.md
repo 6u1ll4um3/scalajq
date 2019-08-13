@@ -16,6 +16,7 @@ Library used :
 * Array/Object Value Iterator: `.[]`
 * Comma: `,`
 * Pipe: `|`
+* Array construction: `[]`
 * Object Construction: `{}`
 * Recursive Descent: `..`
 

@@ -46,6 +46,6 @@ object FilterParser {
       sliceOrIndexTerm
     ) ~ " ".rep).rep(sep=",").rep(sep = "|")
 
-  def filters[_: P]: P[Filters] = seqTerm.map(t => Filters(t.map(SeqTerm)))
+  def parser[_: P]: P[Filter] = seqTerm.map(t => Filter(t.map(SeqTerm)))
 
 }
