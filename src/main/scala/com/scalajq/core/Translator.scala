@@ -21,7 +21,13 @@ object Translator {
   def buildArray(arr: Array, input: JsValue): JsValue = buildFilter(arr.filters, input)
 
   def buildObject(obj: Object, input: JsValue): JsValue = {
-    val jsElem: Seq[JsObject] = obj.nodes.map(n => Json.obj(n.name -> buildFilter(n.filters, input)))
+    val jsElem: Seq[JsObject] = obj.nodes.map { n =>
+      n.output match {
+        case f:Filter => Json.obj(n.name -> buildFilter(f, input))
+        case a:Array  => Json.obj(n.name -> buildArray(a, input))
+        case o:Object => Json.obj(n.name -> buildObject(o, input))
+      }
+    }
     jsElem.foldLeft(Json.obj())((a,b) => a ++ b)
   }
 

@@ -16,7 +16,7 @@ Library used :
 * Array/Object Value Iterator: `.[]`
 * Comma: `,`
 * Pipe: `|`
-* Array construction: `[]`
+* Array Construction: `[]`
 * Object Construction: `{}`
 * Recursive Descent: `..`
 
@@ -70,5 +70,6 @@ JQ(json, ".characters[1].weapons[].name")  // return Json.arr("Quarterstaff", "L
 JQ(json, ".characters[0:2] | .name")       // return Json.arr("Yoda", "Rey")
 JQ(json, ".name, .author.lastName, .author.born.year, .place") // return Json.arr("Star Wars", "Lucas", 1944, "in a galaxy far far away")
 JQ(json, "{name: .name, director: .author.lastName}") // return Json.obj("name" -> "Star Wars", "director" -> "Lucas")
+JQ(json, "{film: .name, infos: [.place, .author.lastName]}") // return Json.obj("film" -> "Star Wars","infos" -> Json.arr("in a galaxy far far away","Lucas"))}
 
 ```

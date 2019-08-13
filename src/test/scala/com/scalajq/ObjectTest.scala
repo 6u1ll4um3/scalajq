@@ -29,10 +29,21 @@ class ObjectTest extends FlatSpec with MustMatchers with BaseTest {
     )
   }
 
-//  "ScalaJq" should "build Object with Array" in {
-//    JQ(json, "{characterNames: .characters[].name , film: [.name, .place]}") mustBe Json.obj(
-//      "characterNames" -> Json.arr("Yoda", "Rey")
-//    )
-//  }
+  "ScalaJq" should "build Object with sub Object" in {
+    JQ(json, "{film: .name, infos: {place: .place, director: .author.lastName}}") mustBe Json.obj(
+      "film" -> "Star Wars",
+      "infos" -> Json.obj(
+        "place" -> "in a galaxy far far away",
+        "director" -> "Lucas"
+      )
+    )
+  }
+
+  "ScalaJq" should "build Object with sub Array" in {
+    JQ(json, "{film: .name, infos: [.place, .author.lastName]}") mustBe Json.obj(
+      "film" -> "Star Wars",
+      "infos" -> Json.arr("in a galaxy far far away","Lucas")
+    )
+  }
 
 }

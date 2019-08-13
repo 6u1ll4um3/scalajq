@@ -5,7 +5,7 @@ case class Array(filters: Filter) extends Output
 case class Object(nodes: Seq[Pair]) extends Output
 case class Filter(terms: Seq[SeqTerm]) extends Output
 
-case class Pair(name: String, filters: Filter)
+case class Pair(name: String, output: Output)
 
 sealed trait Term
 case object NullTerm extends Term
