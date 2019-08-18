@@ -44,8 +44,8 @@ object FilterParser {
       recursiveTerm |
       fieldTerm |
       sliceOrIndexTerm
-    ) ~ " ".rep).rep(sep=",").rep(sep = "|")
+    ) ~ space.?).rep(sep=",").rep(sep = "|")
 
-  def parser[_: P]: P[Filter] = seqTerm.map(t => Filter(t.map(SeqTerm)))
+  def parser[_: P]: P[Filter] = "(".? ~ space.? ~ seqTerm.map(t => Filter(t.map(SeqTerm))) ~ space.? ~ ")".?
 
 }

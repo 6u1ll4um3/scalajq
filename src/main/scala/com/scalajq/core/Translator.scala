@@ -21,11 +21,19 @@ object Translator {
   def buildArray(arr: Array, input: JsValue): JsValue = buildFilter(arr.filters, input)
 
   def buildObject(obj: Object, input: JsValue): JsValue = {
-    val jsElem: Seq[JsObject] = obj.nodes.map { n =>
-      n.output match {
-        case f:Filter => Json.obj(n.name -> buildFilter(f, input))
-        case a:Array  => Json.obj(n.name -> buildArray(a, input))
-        case o:Object => Json.obj(n.name -> buildObject(o, input))
+
+    val jsElem: Seq[JsObject] = obj.nodes.map { node =>
+
+      val jsName = node.name match {
+        case f:Filter   => buildFilter(f, input).as[JsString].value
+        case str:String => str
+        case e          => throw new Exception(s"buildObject, unable to handle expression $e")
+      }
+
+      node.value match {
+        case f:Filter => Json.obj(jsName -> buildFilter(f, input))
+        case a:Array  => Json.obj(jsName -> buildArray(a, input))
+        case o:Object => Json.obj(jsName -> buildObject(o, input))
       }
     }
     jsElem.foldLeft(Json.obj())((a,b) => a ++ b)
@@ -35,7 +43,7 @@ object Translator {
     filters match {
       case Filter(ts) if ts.tail.nonEmpty  => buildFilter(Filter(filters.terms.tail), buildTerms(filters.terms.head, input))
       case Filter(ts) if ts.tail.isEmpty   => buildTerms(filters.terms.head, input)
-      case e                               => throw new Exception(s"run combine, unable to handle expression $e")
+      case e                               => throw new Exception(s"buildFilter, unable to handle expression $e")
     }
   }
 
@@ -43,7 +51,7 @@ object Translator {
     seq match {
       case SeqTerm(ts) if ts.tail.nonEmpty     => termsToJsArray(ts, input)
       case SeqTerm(ts) if ts.tail.isEmpty      => termToFunction(ts.head)(input)
-      case e                                   => throw new Exception(s"run, unable to handle expression $e")
+      case e                                   => throw new Exception(s"buildTerms, unable to handle expression $e")
     }
   }
 

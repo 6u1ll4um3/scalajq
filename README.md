@@ -19,6 +19,7 @@ Library used :
 * Array Construction: `[]`
 * Object Construction: `{}`
 * Recursive Descent: `..`
+* Evaluated expression with parentheses: `()`
 
 ## Usage
 ```scala
@@ -66,10 +67,11 @@ val json: JsValue = Json.parse(s"""
     """.stripMargin)
 
 JQ(json, ".characters[1].weapons[2].name") // return JsString("Blaster")
-JQ(json, ".characters[1].weapons[].name")  // return Json.arr("Quarterstaff", "Lightsaber", "Blaster")
-JQ(json, ".characters[0:2] | .name")       // return Json.arr("Yoda", "Rey")
+JQ(json, ".characters[1].weapons[].name") // return Json.arr("Quarterstaff", "Lightsaber", "Blaster")
+JQ(json, ".characters[0:2] | .name")  // return Json.arr("Yoda", "Rey")
 JQ(json, ".name, .author.lastName, .author.born.year, .place") // return Json.arr("Star Wars", "Lucas", 1944, "in a galaxy far far away")
 JQ(json, "{name: .name, director: .author.lastName}") // return Json.obj("name" -> "Star Wars", "director" -> "Lucas")
 JQ(json, "{film: .name, infos: [.place, .author.lastName]}") // return Json.obj("film" -> "Star Wars","infos" -> Json.arr("in a galaxy far far away","Lucas"))}
+JQ(json, "{(.author.firstName): .author.lastName}") // return Json.obj("George" -> "Lucas")
 
 ```

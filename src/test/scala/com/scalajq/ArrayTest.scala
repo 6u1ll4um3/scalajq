@@ -11,7 +11,7 @@ class ArrayTest extends FlatSpec with MustMatchers with BaseTest {
   "ScalaJq" should "build Array" in {
     JQ(json, "[.name, .place, .author.lastName]") mustBe Json.arr("Star Wars", "in a galaxy far far away", "Lucas")
     JQ(json, "[.name,.place,.author.lastName]") mustBe Json.arr("Star Wars", "in a galaxy far far away", "Lucas")
-    JQ(json, "[.name, .characters[].name]") mustBe Json.arr("Star Wars", Json.arr("Yoda", "Rey"))
+    JQ(json, "[.name, .characters[].name]") mustBe Json.arr("Star Wars", Json.arr("Yoda", "Rey"))  //fixme : must return ["Star Wars","Yoda","Rey"]
   }
 
 }

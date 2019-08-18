@@ -46,4 +46,13 @@ class ObjectTest extends FlatSpec with MustMatchers with BaseTest {
     )
   }
 
+  "ScalaJq" should "build Object with Parentheses" in {
+    JQ(json, "{(.author.firstName): .author.lastName}") mustBe Json.obj("George" -> "Lucas")
+    JQ(json, "{(.characters[0] | .name): .characters[0] | .gender}") mustBe Json.obj("Yoda" -> "male")
+    JQ(json, "{(.characters[0].name): .characters[0].gender}") mustBe Json.obj("Yoda" -> "male")
+  }
+
+
+
+
 }
