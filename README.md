@@ -1,5 +1,6 @@
 # Scala jq 
 [![Build Status](https://travis-ci.org/6u1ll4um3/scalajq.svg?branch=master)](https://travis-ci.org/6u1ll4um3/scalajq)
+[![Coverage Status](https://coveralls.io/repos/github/6u1ll4um3/scalajq/badge.svg?branch=master)](https://coveralls.io/github/6u1ll4um3/scalajq?branch=master)
 
 [jq](https://stedolan.github.io/jq/) for Scala 
 
