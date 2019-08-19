@@ -1,6 +1,7 @@
-# Scala jq
+# Scala jq 
+[![Build Status](https://travis-ci.org/6u1ll4um3/scalajq.svg?branch=master)](https://travis-ci.org/6u1ll4um3/scalajq)
 
-[jq](https://stedolan.github.io/jq/) for Scala
+[jq](https://stedolan.github.io/jq/) for Scala 
 
 Library used :
 *  [com.lihaoyi.fastparse](https://github.com/lihaoyi/fastparse/)
