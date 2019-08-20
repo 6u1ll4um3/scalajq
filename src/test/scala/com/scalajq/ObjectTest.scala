@@ -50,6 +50,10 @@ class ObjectTest extends FlatSpec with MustMatchers with BaseTest {
     JQ(json, "{(.author.firstName): .author.lastName}") mustBe Json.obj("George" -> "Lucas")
     JQ(json, "{(.characters[0] | .name): .characters[0] | .gender}") mustBe Json.obj("Yoda" -> "male")
     JQ(json, "{(.characters[0].name): .characters[0].gender}") mustBe Json.obj("Yoda" -> "male")
+
+    intercept[UnsupportedOperationException] {
+      JQ(json, "{.characters[0].name: .characters[0].gender}")
+    }
   }
 
 

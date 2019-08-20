@@ -46,6 +46,8 @@ object FilterParser {
       sliceOrIndexTerm
     ) ~ space.?).rep(sep=",").rep(sep = "|")
 
-  def parser[_: P]: P[Filter] = "(".? ~ space.? ~ seqTerm.map(t => Filter(t.map(SeqTerm))) ~ space.? ~ ")".?
+  def parser[_: P]: P[Filter] = seqTerm.map(t => Filter(t.map(SeqTerm)))
+
+  def expression[_: P]: P[Filter] = "(" ~ space.? ~ parser ~ space.? ~ ")"
 
 }

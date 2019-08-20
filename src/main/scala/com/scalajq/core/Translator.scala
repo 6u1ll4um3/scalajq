@@ -69,7 +69,6 @@ object Translator {
 
     term match {
       case IdentityTerm                     => identityToFunction
-      case FieldTerm(name, opt)             => fieldToFunction(JsString(name), opt)
       case SeqFieldTerm(fields)             => composeList(fields.map(f => fieldToFunction(JsString(f.name), f.optional)))
       case SeqTerm(terms)                   => seqToFunction(terms)
       case IndexTerm(t, idx, opt)           => indexToFunction(t, idx, opt)
@@ -118,7 +117,7 @@ object Translator {
       case JsNumber(n) =>
         input match {
           case JsArray(value) if n >= 0 && n < value.length => value(n.toInt)
-          case JsArray(value) if n<0 =>
+          case JsArray(value) if n < 0 =>
             val reverseIndex = value.length + n.toInt
             if (reverseIndex >= 0) {
               value(reverseIndex)

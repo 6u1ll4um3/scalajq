@@ -22,4 +22,3 @@ case class IndexTerm(term: Term, exp: Term, optional: Option[String]) extends Te
 
 sealed trait Model
 case class SliceOrIndexModel(start: Term, end: Option[Term], optional: Option[String]) extends Model
-
