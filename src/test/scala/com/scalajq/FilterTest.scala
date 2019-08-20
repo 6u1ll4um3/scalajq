@@ -70,6 +70,7 @@ class FilterTest extends FlatSpec with MustMatchers with BaseTest {
     JQ(json, ".characters[0].name[0:2]") mustBe JsString("Yo")
 
     JQ(json, ".characters[-1].name") mustBe JsString("Rey")
+    JQ(json, ".characters[-3]") mustBe JsNull
   }
 
   "ScalaJq" should "resolve Generic Object Index" in {
